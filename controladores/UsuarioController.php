@@ -101,4 +101,24 @@ class UsuarioController
         echo json_encode($result);
     }
 
+
+    public function update($id, $data)
+    {
+        if (empty($data['nombre']) || empty($data['apellido']) || empty($data['email']) || empty($data['rol'])) {
+            http_response_code(400);
+            echo json_encode(["error" => "Faltan campos: nombre, apellido, email, rol"]);
+            return;
+        }
+        $result = $this->modelo->update($id, $data);
+        if (isset($result['error'])) http_response_code(400);
+        echo json_encode($result);
+    }
+
+    public function delete($id)
+    {
+        $result = $this->modelo->delete($id);
+        if (isset($result['error'])) http_response_code(400);
+        echo json_encode($result);
+    }
+
 }
