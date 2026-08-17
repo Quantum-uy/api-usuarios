@@ -39,8 +39,19 @@ switch ($method) {
     case 'PUT':
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (preg_match('/^\/usuarios\/(\d+)$/', $endpoint, $matches)) {
+        if (preg_match('/^\/usuarios\/(\d+)\/estado$/', $endpoint, $matches)) {
             $controller->updateEstado($matches[1], $data);
+        } elseif (preg_match('/^\/usuarios\/(\d+)$/', $endpoint, $matches)) {
+            $controller->update($matches[1], $data);
+        } else {
+            http_response_code(404);
+            echo json_encode(["error" => "Endpoint no encontrado"]);
+        }
+        break;
+
+    case 'DELETE':
+        if (preg_match('/^\/usuarios\/(\d+)$/', $endpoint, $matches)) {
+            $controller->delete($matches[1]);
         } else {
             http_response_code(404);
             echo json_encode(["error" => "Endpoint no encontrado"]);
