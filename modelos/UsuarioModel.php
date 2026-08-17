@@ -220,4 +220,30 @@ class UsuarioModel
         return ["error" => "No se pudo eliminar el usuario"];
     }
 
+
+    public function update($id, $data)
+    {
+        $stmt = mysqli_prepare($this->conn,
+            "UPDATE usuario SET nombre = ?, apellido = ?, email = ?, rol = ? WHERE id_usuario = ?"
+        );
+        mysqli_stmt_bind_param($stmt, "ssssi",
+            $data['nombre'], $data['apellido'], $data['email'], $data['rol'], $id);
+
+        if (mysqli_stmt_execute($stmt)) {
+            return ["success" => "Usuario actualizado"];
+        }
+        return ["error" => "No se pudo actualizar el usuario"];
+    }
+
+    public function delete($id)
+    {
+        $stmt = mysqli_prepare($this->conn, "DELETE FROM usuario WHERE id_usuario = ?");
+        mysqli_stmt_bind_param($stmt, "i", $id);
+
+        if (mysqli_stmt_execute($stmt)) {
+            return ["success" => "Usuario eliminado"];
+        }
+        return ["error" => "No se pudo eliminar el usuario"];
+    }
+
 }
