@@ -37,6 +37,28 @@ class UsuarioModel
         return $usuarios;
     }
 
+    public function getByRol($rol)
+    {
+        $tablasPermitidas = ['conductor', 'operario', 'peon', 'administrador'];
+        if (!in_array($rol, $tablasPermitidas)) {
+            return [];
+        }
+        $stmt = mysqli_prepare($this->conn,
+            "SELECT u.id_usuario, u.nombre, u.apellido, u.email
+             FROM usuario u
+             INNER JOIN $rol t ON u.id_usuario = t.id_usuario
+             WHERE u.estado = 'activo'
+             ORDER BY u.nombre"
+        );
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $usuarios = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $usuarios[] = $row;
+        }
+        return $usuarios;
+    }
+
     public function getById($id)
     {
         $stmt = mysqli_prepare($this->conn, "SELECT u.id_usuario, u.nombre, u.apellido, u.email, u.telefono, u.estado,

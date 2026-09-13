@@ -17,6 +17,12 @@ class UsuarioController
         echo json_encode($usuarios);
     }
 
+    public function getByRol($rol)
+    {
+        $usuarios = $this->modelo->getByRol($rol);
+        echo json_encode($usuarios);
+    }
+
     public function getById($id)
     {
         $usuario = $this->modelo->getById($id);
@@ -77,6 +83,11 @@ class UsuarioController
 
         if (isset($result['error'])) {
             http_response_code(401);
+        } else {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['usuario'] = $result['usuario'];
         }
 
         echo json_encode($result);
