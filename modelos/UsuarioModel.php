@@ -220,41 +220,52 @@ class UsuarioModel
     public function update($id, $data)
     {
         $stmt = mysqli_prepare($this->conn,
-            "UPDATE usuario SET nombre = ?, apellido = ?, email = ?, rol = ? WHERE id_usuario = ?"
+            "UPDATE usuario SET nombre = ?, apellido = ?, email = ?, telefono = ? WHERE id_usuario = ?"
         );
+        $telefono = $data['telefono'] ?? '';
         mysqli_stmt_bind_param($stmt, "ssssi",
-            $data['nombre'], $data['apellido'], $data['email'], $data['rol'], $id);
+            $data['nombre'], $data['apellido'], $data['email'], $telefono, $id);
 
-        if (mysqli_stmt_execute($stmt)) {
-            return ["success" => "Usuario actualizado"];
+        if (!mysqli_stmt_execute($stmt)) {
+            return ["error" => "No se pudo actualizar el usuario"];
         }
-        return ["error" => "No se pudo actualizar el usuario"];
+
+        if (!empty($data['rol'])) {
+            $this->changeRole($id, $data['rol']);
+        }
+
+        return ["success" => "Usuario actualizado"];
     }
 
-    public function delete($id)
+    private function changeRole($userId, $newRol)
     {
-        $stmt = mysqli_prepare($this->conn, "DELETE FROM usuario WHERE id_usuario = ?");
-        mysqli_stmt_bind_param($stmt, "i", $id);
-
-        if (mysqli_stmt_execute($stmt)) {
-            return ["success" => "Usuario eliminado"];
+        $tables = ['administrador', 'operario', 'conductor', 'peon'];
+        foreach ($tables as $t) {
+            mysqli_query($this->conn, "DELETE FROM $t WHERE id_usuario = $userId");
         }
-        return ["error" => "No se pudo eliminar el usuario"];
-    }
 
-
-    public function update($id, $data)
-    {
-        $stmt = mysqli_prepare($this->conn,
-            "UPDATE usuario SET nombre = ?, apellido = ?, email = ?, rol = ? WHERE id_usuario = ?"
-        );
-        mysqli_stmt_bind_param($stmt, "ssssi",
-            $data['nombre'], $data['apellido'], $data['email'], $data['rol'], $id);
-
-        if (mysqli_stmt_execute($stmt)) {
-            return ["success" => "Usuario actualizado"];
+        switch ($newRol) {
+            case 'administrador':
+                $stmt = mysqli_prepare($this->conn, "INSERT INTO administrador (id_usuario, nivel_permiso) VALUES (?, 1)");
+                mysqli_stmt_bind_param($stmt, "i", $userId);
+                mysqli_stmt_execute($stmt);
+                break;
+            case 'operario':
+                $stmt = mysqli_prepare($this->conn, "INSERT INTO operario (id_usuario) VALUES (?)");
+                mysqli_stmt_bind_param($stmt, "i", $userId);
+                mysqli_stmt_execute($stmt);
+                break;
+            case 'conductor':
+                $stmt = mysqli_prepare($this->conn, "INSERT INTO conductor (id_usuario) VALUES (?)");
+                mysqli_stmt_bind_param($stmt, "i", $userId);
+                mysqli_stmt_execute($stmt);
+                break;
+            case 'peon':
+                $stmt = mysqli_prepare($this->conn, "INSERT INTO peon (id_usuario) VALUES (?)");
+                mysqli_stmt_bind_param($stmt, "i", $userId);
+                mysqli_stmt_execute($stmt);
+                break;
         }
-        return ["error" => "No se pudo actualizar el usuario"];
     }
 
     public function delete($id)

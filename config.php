@@ -9,10 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$hostname = 'localhost';
-$username = 'root';
-$password = '';
-$database = 'sigeru';
+$hostname = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: '';
+$database = getenv('DB_NAME') ?: 'sigeru';
 
 $conn = mysqli_connect($hostname, $username, $password, $database);
 
